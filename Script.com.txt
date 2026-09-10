@@ -1,4 +1,4 @@
--- [[ mhmd on top - Ultimate Hub (Separate Noclip + Speed 190 + Smart Tactical) ]]
+-- [[ mhmd on top - Ultimate Pro Hub (Lightning Fast Speed 190 + Smart Safe Retreat + Full Combo 1,2,3,4,Z,X,C,V) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -29,7 +29,7 @@ local parentGui = (gethui and gethui()) or (syn and syn.protect_gui and (functio
 end)()) or CoreGui
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "mhmd_on_top_ProHub_Final"
+ScreenGui.Name = "mhmd_on_top_ProHub_V2"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = parentGui
 
@@ -87,7 +87,7 @@ TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 TitleLabel.TextSize = 12
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 190 + Separate Noclip"
+TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 190 + Smart Retreat + Fast Combo"
 TitleLabel.Parent = MainFrame
 
 local TitleCorner = Instance.new("UICorner")
@@ -125,7 +125,7 @@ local ResetBtn = createButton("🔄 إعادة تعيين الشخصية الس�
 local function fastPress(key)
    pcall(function()
       VirtualInputManager:SendKeyEvent(true, key, false, game)
-      task.wait(0.015)
+      task.wait(0.005) -- سرعة فائقة جداً للاستجابة الفورية
       VirtualInputManager:SendKeyEvent(false, key, false, game)
    end)
 end
@@ -279,7 +279,6 @@ RunService.RenderStepped:Connect(function()
    local hrp = char:FindFirstChild("HumanoidRootPart")
    local humanoid = char:FindFirstChild("Humanoid")
    
-   -- تفعيل الـ Noclip المنفصل
    if noclipActive then
       for _, part in pairs(char:GetDescendants()) do
          if part:IsA("BasePart") then
@@ -313,6 +312,7 @@ RunService.RenderStepped:Connect(function()
       end)
    end
    
+   -- نظام الانسحاب الذكي (إذا دمك قل تحت 3000 يطير بعيد ويهج، وإذا زاد فوق 6000 يرجع يهجم)
    if tacticalHpActive and humanoid and hrp then
       if humanoid.Health <= 3000 and not isRetreating then
          isRetreating = true
@@ -348,11 +348,12 @@ RunService.RenderStepped:Connect(function()
          end
       end)
       
+      -- إذا دمه قليل (حالة الهروب والانسحاب)، يطير بعيد جداً للأعلى والـ XZ لحماية الباونتي
       if isRetreating then
          humanoid.PlatformStand = true
          pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Swimming) end)
          hrp.Velocity = Vector3.new(0, 0, 0)
-         hrp.CFrame = hrp.CFrame + Vector3.new(0, 4.5, 0)
+         hrp.CFrame = hrp.CFrame + Vector3.new(0, 8, 0) -- طيران عالي وسريع للهروب
          return
       end
       
@@ -381,6 +382,7 @@ RunService.RenderStepped:Connect(function()
          local distance = (currentTarget.Position - hrp.Position).Magnitude
          
          if distance > 5 then
+            -- سرعة 190 الصاروخية للوصول للهدف فوراً
             hrp.Velocity = Vector3.new(0, 0, 0)
             local targetPos = currentTarget.Position + Vector3.new(0, 2.5, 0)
             local direction = (targetPos - hrp.Position).Unit
@@ -388,35 +390,44 @@ RunService.RenderStepped:Connect(function()
             local step = math.min(flightSpeed * RunService.RenderStepped:Wait(), distance)
             hrp.CFrame = hrp.CFrame + (direction * step)
          else
+            -- الكومبو السريع والفوري بالترتيب المطلوب بدقة بالمللي: 2 -> V (3 ثواني) -> C -> X -> 1 -> Z -> C -> X (مع دعم الأزرار 3 و 4 وسرعة التحويل)
             hrp.Velocity = Vector3.new(0, 0, 0)
             
-            if tick() - comboCooldown > 2.5 then
+            if tick() - comboCooldown > 2.0 then
                comboCooldown = tick()
                
                task.spawn(function()
+                  -- 1. زر 2 (فوري وسريع)
                   fastPress(Enum.KeyCode.Two)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 2. زر V (لمدة 3 ثواني)
                   VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.V, false, game)
                   task.wait(3.0)
                   VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.V, false, game)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 3. زر C
                   fastPress(Enum.KeyCode.C)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 4. زر X
                   fastPress(Enum.KeyCode.X)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 5. زر 1 (تحويل سريع)
                   fastPress(Enum.KeyCode.One)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 6. زر Z
                   fastPress(Enum.KeyCode.Z)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 7. زر C
                   fastPress(Enum.KeyCode.C)
-                  task.wait(0.015)
+                  task.wait(0.01)
                   
+                  -- 8. زر X
                   fastPress(Enum.KeyCode.X)
                end)
             end
@@ -427,4 +438,4 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
-print("تمت إضافة زر الـ Noclip المنفصل بنجاح يا أبو تركي! 👑👻")
+print("تم تحديث السكربت بالسرعة القصوى والانسحاب الذكي بنجاح يا أبو تركي! 👑🚀🔥")
