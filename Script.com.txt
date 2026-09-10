@@ -1,4 +1,4 @@
--- [[ mhmd on top - Ultimate Pro Hub (Speed 220 + Weapons 2 & 1 + 3s V Delay + C,X,Z Combo + SafeZone & PvP Check + 6s Smart Target) ]]
+-- [[ AZC on top - Ultimate Bounty Hub (Speed 190 + Instant Next Target + Auto E & J) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -14,14 +14,15 @@ local hardAimActive = false
 local antiStunActive = false
 local tacticalHpActive = false
 local autoV4Active = false
+local fpsBoosterActive = false
 
 local currentTarget = nil
 local targetStartTime = 0
 local lastTargetHealth = 0
 local isRetreating = false
 local realWaterPart = nil
+local hasFiredCombo = false
 
--- واجهة مستخدم خفيفة ونظيفة
 local CoreGui = game:GetService("CoreGui")
 local parentGui = (gethui and gethui()) or (syn and syn.protect_gui and (function()
     local g = Instance.new("ScreenGui")
@@ -31,11 +32,10 @@ local parentGui = (gethui and gethui()) or (syn and syn.protect_gui and (functio
 end)()) or CoreGui
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "mhmd_on_top_Speed220Hub"
+ScreenGui.Name = "AZC_on_top_Hub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = parentGui
 
--- الزر الخارجي العائم لإخفاء/إظهار القائمة
 local ToggleExtBtn = Instance.new("TextButton")
 ToggleExtBtn.Size = UDim2.new(0, 45, 0, 45)
 ToggleExtBtn.Position = UDim2.new(0, 20, 0, 100)
@@ -43,7 +43,7 @@ ToggleExtBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 ToggleExtBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
 ToggleExtBtn.TextSize = 18
 ToggleExtBtn.Font = Enum.Font.SourceSansBold
-ToggleExtBtn.Text = "👑"
+ToggleExtBtn.Text = "AZC"
 ToggleExtBtn.Active = true
 ToggleExtBtn.Draggable = true
 ToggleExtBtn.Parent = ScreenGui
@@ -53,13 +53,12 @@ ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleExtBtn
 
 local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(255, 180, 0)
+ToggleStroke.Color = Color3.fromRGB(0, 255, 200)
 ToggleStroke.Thickness = 2
 ToggleStroke.Parent = ToggleExtBtn
 
--- القائمة الرئيسية
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 275, 0, 430)
+MainFrame.Size = UDim2.new(0, 275, 0, 470)
 MainFrame.Position = UDim2.new(0, 80, 0, 100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
 MainFrame.BorderSizePixel = 0
@@ -72,7 +71,7 @@ MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 180, 0)
+UIStroke.Color = Color3.fromRGB(0, 255, 200)
 UIStroke.Thickness = 2
 UIStroke.Parent = MainFrame
 
@@ -86,10 +85,10 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 255, 0, 45)
 TitleLabel.Position = UDim2.new(0, 10, 0, 8)
 TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-TitleLabel.TextSize = 11
+TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 200)
+TitleLabel.TextSize = 12
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 220 + Weapons 2->1 Hub"
+TitleLabel.Text = "AZC on top\nUltimate Bounty Hub"
 TitleLabel.Parent = MainFrame
 
 local TitleCorner = Instance.new("UICorner")
@@ -113,14 +112,15 @@ local function createButton(name, yPos, color)
    return btn
 end
 
-local BountyBtn = createButton("✈️ صيد الباونتي الشامل (سرعة 220): OFF", 60, Color3.fromRGB(255, 170, 0))
-local NoclipBtn = createButton("👻 الـ Noclip الشامل (كل البارتات مخفية): OFF", 102, Color3.fromRGB(200, 100, 255))
-local AutoV4Btn = createButton("⚡ أوتو تحويل Race V4 (زر 5 + كليك): OFF", 144, Color3.fromRGB(0, 255, 200))
-local HardAimBtn = createButton("🎯 إيم بوت (الأقرب إليك مباشرة): OFF", 186, Color3.fromRGB(255, 220, 0))
-local WaterBoxBtn = createButton("💧 مربع مويه (سباحة ثابتة): OFF", 228, Color3.fromRGB(0, 180, 255))
-local TacticalBtn = createButton("🛡️ نظام الانسحاب والهجوم الذكي: OFF", 270, Color3.fromRGB(100, 220, 255))
-local HitboxBtn = createButton("👁️ توسيع وهِت بوكس الخصوم: OFF", 312, Color3.fromRGB(255, 100, 255))
-local ResetBtn = createButton("🔄 إعادة تعيين الشخصية السريعة", 354, Color3.fromRGB(255, 100, 100))
+local BountyBtn = createButton("صيد الباونتي (سرعة 190): OFF", 60, Color3.fromRGB(255, 170, 0))
+local NoclipBtn = createButton("الـ Noclip الشامل: OFF", 102, Color3.fromRGB(200, 100, 255))
+local FpsBoostBtn = createButton("إزالة اللاق وتحسين الـ FPS: OFF", 144, Color3.fromRGB(0, 255, 150))
+local AutoV4Btn = createButton("أوتو تحويل Race V4 (زر 5 + كليك): OFF", 186, Color3.fromRGB(0, 255, 200))
+local HardAimBtn = createButton("إيم بوت (الأقرب إليك): OFF", 228, Color3.fromRGB(255, 220, 0))
+local WaterBoxBtn = createButton("زر المويه (سباحة ثابتة): OFF", 270, Color3.fromRGB(0, 180, 255))
+local TacticalBtn = createButton("نظام الانسحاب والهجوم الذكي: OFF", 312, Color3.fromRGB(100, 220, 255))
+local HitboxBtn = createButton("تكبير وهِت بوكس الخصوم: OFF", 354, Color3.fromRGB(255, 100, 255))
+local ResetBtn = createButton("إعادة تعيين الشخصية السريعة", 396, Color3.fromRGB(255, 100, 100))
 
 local function fastPress(key)
    pcall(function()
@@ -147,39 +147,64 @@ end
 
 BountyBtn.MouseButton1Click:Connect(function()
    bountyHuntActive = not bountyHuntActive
-   BountyBtn.Text = bountyHuntActive and "✈️ صيد الباونتي الشامل: ON 🟢" or "✈️ صيد الباونتي الشامل (سرعة 220): OFF 🔴"
+   BountyBtn.Text = bountyHuntActive and "صيد الباونتي: ON 🟢" or "صيد الباونتي (سرعة 190): OFF 🔴"
    if bountyHuntActive then
       triggerBusoHaki()
       ensurePvPEnabled()
    else
       currentTarget = nil
+      hasFiredCombo = false
    end
 end)
 
 NoclipBtn.MouseButton1Click:Connect(function()
    noclipActive = not noclipActive
-   NoclipBtn.Text = noclipActive and "👻 الـ Noclip الشامل: ON 🟢" or "👻 الـ Noclip الشامل (كل البارتات مخفية): OFF 🔴"
+   NoclipBtn.Text = noclipActive and "الـ Noclip الشامل: ON 🟢" or "الـ Noclip الشامل: OFF 🔴"
+end)
+
+FpsBoostBtn.MouseButton1Click:Connect(function()
+   fpsBoosterActive = not fpsBoosterActive
+   FpsBoostBtn.Text = fpsBoosterActive and "إزالة اللاق وتحسين الـ FPS: ON 🟢" or "إزالة اللاق وتحسين الـ FPS: OFF 🔴"
+   
+   if fpsBoosterActive then
+      pcall(function()
+         for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+               obj:Destroy()
+            elseif obj:IsA("BasePart") and (obj.Name:lower():find("leaf") or obj.Name:lower():find("grass") or obj.Name:lower():find("debris") or obj.Name:lower():find("rock")) then
+               obj:Destroy()
+            end
+         end
+         Lighting.GlobalShadows = false
+         Lighting.FogEnd = 999999
+         for _, v in pairs(Lighting:GetChildren()) do
+            if v:IsA("PostEffect") then
+               v.Enabled = false
+            end
+         end
+      end)
+   end
 end)
 
 AutoV4Btn.MouseButton1Click:Connect(function()
    autoV4Active = not autoV4Active
-   AutoV4Btn.Text = autoV4Active and "⚡ أوتو تحويل Race V4: ON 🟢" or "⚡ أوتو تحويل Race V4 (زر 5 + كليك): OFF 🔴"
+   AutoV4Btn.Text = autoV4Active and "أوتو تحويل Race V4: ON 🟢" or "أوتو تحويل Race V4 (زر 5 + كليك): OFF 🔴"
 end)
 
 HardAimBtn.MouseButton1Click:Connect(function()
    hardAimActive = not hardAimActive
-   HardAimBtn.Text = hardAimActive and "🎯 إيم بوت (الأقرب إليك): ON 🟢" or "🎯 إيم بوت (الأقرب إليك مباشرة): OFF 🔴"
+   HardAimBtn.Text = hardAimActive and "إيم بوت (الأقرب إليك): ON 🟢" or "إيم بوت (الأقرب إليك): OFF 🔴"
 end)
 
 WaterBoxBtn.MouseButton1Click:Connect(function()
    waterBoxActive = not waterBoxActive
-   WaterBoxBtn.Text = waterBoxActive and "💧 مربع مويه (سباحة ثابتة): ON 🟢" or "💧 مربع مويه (سباحة ثابتة): OFF 🔴"
+   WaterBoxBtn.Text = waterBoxActive and "زر المويه (سباحة ثابتة): ON 🟢" or "زر المويه (سباحة ثابتة): OFF 🔴"
    
    if waterBoxActive then
       pcall(function()
          if not realWaterPart then
             realWaterPart = Instance.new("Part")
-            realWaterPart.Name = "mhmd_SwimmingWaterBox"
+            realWaterPart.Name = "AZC_SwimmingWaterBox"
             realWaterPart.Size = Vector3.new(7, 7, 7)
             realWaterPart.Material = Enum.Material.Glass
             realWaterPart.Color = Color3.fromRGB(0, 150, 255)
@@ -204,16 +229,17 @@ end)
 
 TacticalBtn.MouseButton1Click:Connect(function()
    tacticalHpActive = not tacticalHpActive
-   TacticalBtn.Text = tacticalHpActive and "🛡️ نظام الانسحاب والهجوم الذكي: ON 🟢" or "🛡️ نظام الانسحاب والهجوم الذكي: OFF 🔴"
+   TacticalBtn.Text = tacticalHpActive and "نظام الانسحاب والهجوم الذكي: ON 🟢" or "نظام الانسحاب والهجوم الذكي: OFF 🔴"
 end)
 
 HitboxBtn.MouseButton1Click:Connect(function()
    local state = false
+   local newSize = Vector3.new(15, 15, 15)
    for _, p in pairs(Players:GetPlayers()) do
       if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
          local hrp = p.Character.HumanoidRootPart
          if hrp.Size == Vector3.new(2, 2, 1) then
-            hrp.Size = Vector3.new(12, 12, 12)
+            hrp.Size = newSize
             hrp.Transparency = 0.85
             hrp.CanCollide = false
             state = true
@@ -224,7 +250,7 @@ HitboxBtn.MouseButton1Click:Connect(function()
          end
       end
    end
-   HitboxBtn.Text = state and "👁️ توسيع الهِت بوكس: ON 🟢" or "👁️ توسيع وهِت بوكس الخصوم: OFF 🔴"
+   HitboxBtn.Text = state and "تكبير وهِت بوكس الخصوم: ON 🟢" or "تكبير وهِت بوكس الخصوم: OFF 🔴"
 end)
 
 ResetBtn.MouseButton1Click:Connect(function()
@@ -345,7 +371,7 @@ RunService.RenderStepped:Connect(function()
          humanoid.PlatformStand = true
          pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Swimming) end)
          hrp.Velocity = Vector3.new(0, 0, 0)
-         local escapeSpeed = 220
+         local escapeSpeed = 190
          local step = escapeSpeed * RunService.RenderStepped:Wait()
          hrp.CFrame = hrp.CFrame + (Vector3.new(0, 1, 0) * step)
          return
@@ -356,7 +382,7 @@ RunService.RenderStepped:Connect(function()
          needNewTarget = true
       else
          local tHum = currentTarget.Parent.Humanoid
-         if tHum.Health <= 0 or isInSafeZone(currentTarget.Parent) then
+         if tHum.Health <= 0 or isInSafeZone(currentTarget.Parent) or hasFiredCombo then
             needNewTarget = true
          else
             if tick() - targetStartTime >= 6 then
@@ -371,6 +397,7 @@ RunService.RenderStepped:Connect(function()
       end
       
       if needNewTarget then
+         hasFiredCombo = false
          local closestTarget = nil
          local shortestDist = math.huge
          for _, p in pairs(Players:GetPlayers()) do
@@ -398,32 +425,36 @@ RunService.RenderStepped:Connect(function()
          
          local distance = (currentTarget.Position - hrp.Position).Magnitude
          
-         if distance > 5 then
+         if distance > 6 then
             hrp.Velocity = Vector3.new(0, 0, 0)
             local targetPos = currentTarget.Position + Vector3.new(0, 2.5, 0)
             local direction = (targetPos - hrp.Position).Unit
-            local flightSpeed = 220
+            local flightSpeed = 190
             local step = math.min(flightSpeed * RunService.RenderStepped:Wait(), distance)
             hrp.CFrame = hrp.CFrame + (direction * step)
          else
+            pcall(function()
+               fastPress(Enum.KeyCode.E)
+               fastPress(Enum.KeyCode.J)
+            end)
+            
             hrp.Velocity = Vector3.new(0, 0, 0)
             
-            if tick() - comboCooldown > 5.5 then
+            if not hasFiredCombo and tick() - comboCooldown > 0.5 then
                comboCooldown = tick()
+               hasFiredCombo = true
                
                task.spawn(function()
-                  -- 1. سلاح رقم 2 (الضرب بـ V ثم انتظار 3 ثواني، ثم C, X, Z)
                   fastPress(Enum.KeyCode.Two)
                   task.wait(0.02)
                   fastPress(Enum.KeyCode.V)
                   
-                  task.wait(3.00) -- انتظار 3 ثواني بالتمام والكمال بعد ضربة V
+                  task.wait(3.00)
                   
                   fastPress(Enum.KeyCode.C)
                   fastPress(Enum.KeyCode.X)
                   fastPress(Enum.KeyCode.Z)
                   
-                  -- 2. الانتقال الفوري لسلاح رقم 1 وباقي الضربات
                   fastPress(Enum.KeyCode.One)
                   task.wait(0.02)
                   fastPress(Enum.KeyCode.Z)
@@ -438,4 +469,4 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
-print("تم ضبط السرعة إلى 220 مع نظام الأسلحة (2 ثم 1) وتأخير 3 ثواني لـ V بنجاح يا أبو تركي! 👑🚀")
+print("AZC on top - Loaded Successfully with Speed 190! 👑")
