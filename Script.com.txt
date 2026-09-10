@@ -1,4 +1,4 @@
--- [[ mhmd on top - Ultimate Hub (Speed 190 + Optimizer + Smart Tactical Retreat/Attack) ]]
+-- [[ mhmd on top - Ultimate Hub (Separate Noclip + Speed 190 + Smart Tactical) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -7,6 +7,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
 
 local bountyHuntActive = false
+local noclipActive = false
 local waterBoxActive = false
 local hardAimActive = false
 local trueInfHpActive = false
@@ -28,7 +29,7 @@ local parentGui = (gethui and gethui()) or (syn and syn.protect_gui and (functio
 end)()) or CoreGui
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "mhmd_on_top_ProHub_190"
+ScreenGui.Name = "mhmd_on_top_ProHub_Final"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = parentGui
 
@@ -54,9 +55,9 @@ ToggleStroke.Color = Color3.fromRGB(255, 180, 0)
 ToggleStroke.Thickness = 2
 ToggleStroke.Parent = ToggleExtBtn
 
--- القائمة الرئيسية (تم توسيعها قليلاً لتكفي الأزرار الجديدة)
+-- القائمة الرئيسية
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 275, 0, 495)
+MainFrame.Size = UDim2.new(0, 275, 0, 535)
 MainFrame.Position = UDim2.new(0, 80, 0, 100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
 MainFrame.BorderSizePixel = 0
@@ -86,7 +87,7 @@ TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 TitleLabel.TextSize = 12
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 190 + Anti-Lag + Smart Tactical"
+TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 190 + Separate Noclip"
 TitleLabel.Parent = MainFrame
 
 local TitleCorner = Instance.new("UICorner")
@@ -110,15 +111,16 @@ local function createButton(name, yPos, color)
    return btn
 end
 
-local BountyBtn = createButton("✈️ صيد الباونتي + Noclip (سرعة 190): OFF", 60, Color3.fromRGB(255, 170, 0))
-local HardAimBtn = createButton("🎯 إيم بوت (الأقرب إليك مباشرة): OFF", 102, Color3.fromRGB(255, 220, 0))
-local WaterBoxBtn = createButton("💧 مربع مويه (سباحة ثابتة): OFF", 144, Color3.fromRGB(0, 180, 255))
-local OptimizerBtn = createButton("⚡ زر إزالة اللإق والأشياء غير المهمة: OFF", 186, Color3.fromRGB(50, 255, 50))
-local TacticalBtn = createButton("🛡️ نظام الانسحاب والهجوم الذكي: OFF", 228, Color3.fromRGB(100, 220, 255))
-local HpBtn = createButton("💀 دم لا نهائي (True Inf HP): OFF", 270, Color3.fromRGB(255, 60, 60))
-local HitboxBtn = createButton("👁️ توسيع وهِت بوكس الخصوم: OFF", 312, Color3.fromRGB(255, 100, 255))
-local AntiStunBtn = createButton("🛡️ مانع الصدمات المطلق (Anti-Stun): OFF", 354, Color3.fromRGB(180, 120, 255))
-local ResetBtn = createButton("🔄 إعادة تعيين الشخصية السريعة", 396, Color3.fromRGB(255, 100, 100))
+local BountyBtn = createButton("✈️ صيد الباونتي (سرعة 190): OFF", 60, Color3.fromRGB(255, 170, 0))
+local NoclipBtn = createButton("👻 زر الـ Noclip (اختراق الجدران): OFF", 102, Color3.fromRGB(200, 100, 255))
+local HardAimBtn = createButton("🎯 إيم بوت (الأقرب إليك مباشرة): OFF", 144, Color3.fromRGB(255, 220, 0))
+local WaterBoxBtn = createButton("💧 مربع مويه (سباحة ثابتة): OFF", 186, Color3.fromRGB(0, 180, 255))
+local OptimizerBtn = createButton("⚡ زر إزالة اللإق والأشياء غير المهمة: OFF", 228, Color3.fromRGB(50, 255, 50))
+local TacticalBtn = createButton("🛡️ نظام الانسحاب والهجوم الذكي: OFF", 270, Color3.fromRGB(100, 220, 255))
+local HpBtn = createButton("💀 دم لا نهائي (True Inf HP): OFF", 312, Color3.fromRGB(255, 60, 60))
+local HitboxBtn = createButton("👁️ توسيع وهِت بوكس الخصوم: OFF", 354, Color3.fromRGB(255, 100, 255))
+local AntiStunBtn = createButton("🛡️ مانع الصدمات المطلق (Anti-Stun): OFF", 396, Color3.fromRGB(180, 120, 255))
+local ResetBtn = createButton("🔄 إعادة تعيين الشخصية السريعة", 438, Color3.fromRGB(255, 100, 100))
 
 local function fastPress(key)
    pcall(function()
@@ -136,12 +138,17 @@ end
 
 BountyBtn.MouseButton1Click:Connect(function()
    bountyHuntActive = not bountyHuntActive
-   BountyBtn.Text = bountyHuntActive and "✈️ صيد الباونتي + Noclip: ON 🟢" or "✈️ صيد الباونتي + Noclip (سرعة 190): OFF 🔴"
+   BountyBtn.Text = bountyHuntActive and "✈️ صيد الباونتي: ON 🟢" or "✈️ صيد الباونتي (سرعة 190): OFF 🔴"
    if bountyHuntActive then
       triggerBusoHaki()
    else
       currentTarget = nil
    end
+end)
+
+NoclipBtn.MouseButton1Click:Connect(function()
+   noclipActive = not noclipActive
+   NoclipBtn.Text = noclipActive and "👻 زر الـ Noclip: ON 🟢" or "👻 زر الـ Noclip (اختراق الجدران): OFF 🔴"
 end)
 
 HardAimBtn.MouseButton1Click:Connect(function()
@@ -180,7 +187,6 @@ WaterBoxBtn.MouseButton1Click:Connect(function()
    end
 end)
 
--- زر إزالة اللأق والأشياء غير المهمة
 OptimizerBtn.MouseButton1Click:Connect(function()
    optimizationActive = not optimizationActive
    OptimizerBtn.Text = optimizationActive and "⚡ زر إزالة اللإق: ON 🟢" or "⚡ زر إزالة اللإق والأشياء غير المهمة: OFF 🔴"
@@ -273,7 +279,8 @@ RunService.RenderStepped:Connect(function()
    local hrp = char:FindFirstChild("HumanoidRootPart")
    local humanoid = char:FindFirstChild("Humanoid")
    
-   if bountyHuntActive then
+   -- تفعيل الـ Noclip المنفصل
+   if noclipActive then
       for _, part in pairs(char:GetDescendants()) do
          if part:IsA("BasePart") then
             part.CanCollide = false
@@ -306,7 +313,6 @@ RunService.RenderStepped:Connect(function()
       end)
    end
    
-   -- نظام الانسحاب والهجوم الذكي (يهج إذا الدم قل تحت 3000، ويرجع يهجم إذا زاد فوق 6000)
    if tacticalHpActive and humanoid and hrp then
       if humanoid.Health <= 3000 and not isRetreating then
          isRetreating = true
@@ -342,12 +348,11 @@ RunService.RenderStepped:Connect(function()
          end
       end)
       
-      -- إذا كان في حالة انسحاب (دمه قليل)، يطير فوق بعيد جداً عشان يحمي نفسه
       if isRetreating then
          humanoid.PlatformStand = true
          pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Swimming) end)
          hrp.Velocity = Vector3.new(0, 0, 0)
-         hrp.CFrame = hrp.CFrame + Vector3.new(0, 4.5, 0) -- طيران للأعلى وللخارج للهروب
+         hrp.CFrame = hrp.CFrame + Vector3.new(0, 4.5, 0)
          return
       end
       
@@ -376,7 +381,6 @@ RunService.RenderStepped:Connect(function()
          local distance = (currentTarget.Position - hrp.Position).Magnitude
          
          if distance > 5 then
-            -- سرعة 190 الصاروخية للتوجه للهدف
             hrp.Velocity = Vector3.new(0, 0, 0)
             local targetPos = currentTarget.Position + Vector3.new(0, 2.5, 0)
             local direction = (targetPos - hrp.Position).Unit
@@ -384,7 +388,6 @@ RunService.RenderStepped:Connect(function()
             local step = math.min(flightSpeed * RunService.RenderStepped:Wait(), distance)
             hrp.CFrame = hrp.CFrame + (direction * step)
          else
-            -- الكومبو بالترتيب الصحيح بالحرف: 2 -> V (3 ثواني) -> C -> X -> 1 -> Z -> C -> X
             hrp.Velocity = Vector3.new(0, 0, 0)
             
             if tick() - comboCooldown > 2.5 then
@@ -424,4 +427,4 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
-print("تم إضافة مانع اللاق ونظام الهروب/الهجوم الذكي بنجاح يا أبو تركي! 👑🚀")
+print("تمت إضافة زر الـ Noclip المنفصل بنجاح يا أبو تركي! 👑👻")
