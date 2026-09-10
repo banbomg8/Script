@@ -1,8 +1,9 @@
--- [[ mhmd on top - Ultimate Pro Hub (Auto PvP Check + SafeZone Bypass + 6s Smart Target Switcher + Sequential Combo + Universal Noclip + Auto V4) ]]
+-- [[ mhmd on top - Ultimate Pro Hub (Speed 220 + Weapons 2 & 1 + 3s V Delay + C,X,Z Combo + SafeZone & PvP Check + 6s Smart Target) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
 
@@ -30,7 +31,7 @@ local parentGui = (gethui and gethui()) or (syn and syn.protect_gui and (functio
 end)()) or CoreGui
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "mhmd_on_top_SmartBountyHub"
+ScreenGui.Name = "mhmd_on_top_Speed220Hub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = parentGui
 
@@ -88,7 +89,7 @@ TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 TitleLabel.TextSize = 11
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Smart Target & PvP Hub"
+TitleLabel.Text = "👑 mhmd on top 👑\n✈️ Speed 220 + Weapons 2->1 Hub"
 TitleLabel.Parent = MainFrame
 
 local TitleCorner = Instance.new("UICorner")
@@ -112,7 +113,7 @@ local function createButton(name, yPos, color)
    return btn
 end
 
-local BountyBtn = createButton("✈️ صيد الباونتي الشامل (الكل في زر واحد): OFF", 60, Color3.fromRGB(255, 170, 0))
+local BountyBtn = createButton("✈️ صيد الباونتي الشامل (سرعة 220): OFF", 60, Color3.fromRGB(255, 170, 0))
 local NoclipBtn = createButton("👻 الـ Noclip الشامل (كل البارتات مخفية): OFF", 102, Color3.fromRGB(200, 100, 255))
 local AutoV4Btn = createButton("⚡ أوتو تحويل Race V4 (زر 5 + كليك): OFF", 144, Color3.fromRGB(0, 255, 200))
 local HardAimBtn = createButton("🎯 إيم بوت (الأقرب إليك مباشرة): OFF", 186, Color3.fromRGB(255, 220, 0))
@@ -135,7 +136,6 @@ local function triggerBusoHaki()
    end)
 end
 
--- التأكد من تفعيل الـ PvP تلقائياً
 local function ensurePvPEnabled()
    pcall(function()
       local remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
@@ -147,7 +147,7 @@ end
 
 BountyBtn.MouseButton1Click:Connect(function()
    bountyHuntActive = not bountyHuntActive
-   BountyBtn.Text = bountyHuntActive and "✈️ صيد الباونتي الشامل: ON 🟢" or "✈️ صيد الباونتي الشامل (الكل في زر واحد): OFF 🔴"
+   BountyBtn.Text = bountyHuntActive and "✈️ صيد الباونتي الشامل: ON 🟢" or "✈️ صيد الباونتي الشامل (سرعة 220): OFF 🔴"
    if bountyHuntActive then
       triggerBusoHaki()
       ensurePvPEnabled()
@@ -239,7 +239,6 @@ local comboCooldown = 0
 local waterAngle = 0
 local v4Cooldown = 0
 
--- دالة فحص الـ Safe Zone للـلاعب أو الإحداثيات
 local function isInSafeZone(targetChar)
    if not targetChar then return true end
    if targetChar:FindFirstChild("SafeZone") then return true end
@@ -265,7 +264,6 @@ RunService.RenderStepped:Connect(function()
    local hrp = char:FindFirstChild("HumanoidRootPart")
    local humanoid = char:FindFirstChild("Humanoid")
    
-   -- Noclip شامل لكل الماب والشخصية
    if noclipActive then
       for _, part in pairs(Workspace:GetDescendants()) do
          if part:IsA("BasePart") then
@@ -279,7 +277,6 @@ RunService.RenderStepped:Connect(function()
       end
    end
    
-   -- أوتو تحويل V4 (زر 5 + كليك)
    if autoV4Active and tick() - v4Cooldown > 5 then
       pcall(function()
          v4Cooldown = tick()
@@ -309,7 +306,6 @@ RunService.RenderStepped:Connect(function()
       end)
    end
    
-   -- نظام الانسحاب الذكي (تحت 3000 دم يطير بسرعة 200 بعيداً، فوق 6000 يرجع يهجم)
    if tacticalHpActive and humanoid and hrp then
       if humanoid.Health <= 3000 and not isRetreating then
          isRetreating = true
@@ -345,18 +341,16 @@ RunService.RenderStepped:Connect(function()
          end
       end)
       
-      -- حالة الهروب والتراجع الذكي بسرعة 200
       if isRetreating then
          humanoid.PlatformStand = true
          pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Swimming) end)
          hrp.Velocity = Vector3.new(0, 0, 0)
-         local escapeSpeed = 200
+         local escapeSpeed = 220
          local step = escapeSpeed * RunService.RenderStepped:Wait()
          hrp.CFrame = hrp.CFrame + (Vector3.new(0, 1, 0) * step)
          return
       end
       
-      -- فحص الهدف الحالي وإذا مات أو دخل Safe Zone أو مرّت 6 ثواني بدون دمج (ضرر)، يتم تغيير الهدف فوراً
       local needNewTarget = false
       if not currentTarget or not currentTarget.Parent or not currentTarget.Parent:FindFirstChild("Humanoid") then
          needNewTarget = true
@@ -365,13 +359,10 @@ RunService.RenderStepped:Connect(function()
          if tHum.Health <= 0 or isInSafeZone(currentTarget.Parent) then
             needNewTarget = true
          else
-            -- نظام الـ 6 ثواني: فحص ما إذا تم دمج اللاعب أم لا
             if tick() - targetStartTime >= 6 then
                if tHum.Health >= lastTargetHealth then
-                  -- لم يتم تقليل دم اللاعب خلال 6 ثواني -> غير الهدف فوراً لاسترخاء السكربت والبحث عن غيره
                   needNewTarget = true
                else
-                  -- تم دمج اللاعب بنجاح، نحدث آخر دم ونعيد مؤقت الـ 6 ثواني
                   lastTargetHealth = tHum.Health
                   targetStartTime = tick()
                end
@@ -385,7 +376,6 @@ RunService.RenderStepped:Connect(function()
          for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
                local pChar = p.Character
-               -- تأكد إن اللاعب مو في Safe Zone وأنك لست أنت هدف نفسك
                if not isInSafeZone(pChar) then
                   local dist = (hrp.Position - pChar.HumanoidRootPart.Position).Magnitude
                   if dist < shortestDist then
@@ -412,43 +402,32 @@ RunService.RenderStepped:Connect(function()
             hrp.Velocity = Vector3.new(0, 0, 0)
             local targetPos = currentTarget.Position + Vector3.new(0, 2.5, 0)
             local direction = (targetPos - hrp.Position).Unit
-            local flightSpeed = 190
+            local flightSpeed = 220
             local step = math.min(flightSpeed * RunService.RenderStepped:Wait(), distance)
             hrp.CFrame = hrp.CFrame + (direction * step)
          else
-            -- الكومبو التعاقبي الدقيق بالترتيب المطلوب: 2 (V,C,X,Z) -> 1 (Z,C,X) -> 3 (Z,X,C) -> 4 (Z,X)
             hrp.Velocity = Vector3.new(0, 0, 0)
             
-            if tick() - comboCooldown > 1.2 then
+            if tick() - comboCooldown > 5.5 then
                comboCooldown = tick()
                
                task.spawn(function()
-                  -- 1. سلاح رقم 2 (مهارات V, C, X, Z)
+                  -- 1. سلاح رقم 2 (الضرب بـ V ثم انتظار 3 ثواني، ثم C, X, Z)
                   fastPress(Enum.KeyCode.Two)
-                  task.wait(0.01)
+                  task.wait(0.02)
                   fastPress(Enum.KeyCode.V)
+                  
+                  task.wait(3.00) -- انتظار 3 ثواني بالتمام والكمال بعد ضربة V
+                  
                   fastPress(Enum.KeyCode.C)
                   fastPress(Enum.KeyCode.X)
                   fastPress(Enum.KeyCode.Z)
                   
-                  -- 2. سلاح رقم 1 (مهارات Z, C, X)
+                  -- 2. الانتقال الفوري لسلاح رقم 1 وباقي الضربات
                   fastPress(Enum.KeyCode.One)
-                  task.wait(0.01)
+                  task.wait(0.02)
                   fastPress(Enum.KeyCode.Z)
                   fastPress(Enum.KeyCode.C)
-                  fastPress(Enum.KeyCode.X)
-                  
-                  -- 3. سلاح رقم 3 (مهارات Z, X, C)
-                  fastPress(Enum.KeyCode.Three)
-                  task.wait(0.01)
-                  fastPress(Enum.KeyCode.Z)
-                  fastPress(Enum.KeyCode.X)
-                  fastPress(Enum.KeyCode.C)
-                  
-                  -- 4. سلاح رقم 4 (مهارات Z, X)
-                  fastPress(Enum.KeyCode.Four)
-                  task.wait(0.01)
-                  fastPress(Enum.KeyCode.Z)
                   fastPress(Enum.KeyCode.X)
                end)
             end
@@ -459,4 +438,4 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
-print("تم إضافة فحص الـ PvP، تخطي الـ Safe Zone، ونظام تبديل الهدف بعد 6 ثواني بنجاح يا أبو تركي! 👑🚀")
+print("تم ضبط السرعة إلى 220 مع نظام الأسلحة (2 ثم 1) وتأخير 3 ثواني لـ V بنجاح يا أبو تركي! 👑🚀")
